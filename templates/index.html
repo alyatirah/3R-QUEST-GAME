@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8" />
+<title>3R QUEST - Permainan Kitar Semula</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #e0f7fa; color: #006064; }
+  h1 { text-align: center; margin-top: 20px; }
+  #game-area { display: flex; justify-content: space-around; margin: 20px; }
+  .item, .bin { width: 120px; height: 120px; margin: 10px; border: 2px solid #006064; border-radius: 10px; background: white; cursor: grab; text-align: center; }
+  .item img { width: 80px; height: 80px; margin-top: 10px; }
+  .bin { background: #b2dfdb; }
+  .bin.blue { background: #4fc3f7; }
+  .bin.green { background: #81c784; }
+  .bin.yellow { background: #fff176; }
+  #scoreboard { text-align: center; font-size: 18px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>3R QUEST - Permainan Kitar Semula</h1>
+
+<div style="text-align:center;">
+  Nama Pemain: <input type="text" id="playerName" placeholder="Masukkan nama anda" />
+</div>
+
+<div id="scoreboard">Skor: 0</div>
+
+<div id="game-area">
+  <div id="items-container">
+    {% for item in items %}
+    <div class="item" draggable="true" data-type="{{ item.type }}" title="{{ item.name }}">
+      <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}" />
+      <div>{{ item.name }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div id="bins-container">
+    <div class="bin blue" data-type="plastik" title="Tong Plastik">Tong Plastik</div>
+    <div class="bin green" data-type="kertas" title="Tong Kertas">Tong Kertas</div>
+    <div class="bin yellow" data-type="logam" title="Tong Logam">Tong Logam</div>
+  </div>
+</div>
+
+<script>
+const items = document.querySelectorAll('.item');
+const bins = document.querySelectorAll('.bin');
+const scoreboard = document.getElementById('scoreboard');
+let score = 0;
+
+items.forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('type', item.getAttribute('data-type'));
+    e.dataTransfer.setData('name', item.title);
+  });
+});
+
+bins.forEach(bin => {
+  bin.addEventListener('dragover', e => {
+    e.preventDefault();
+  });
+
+  bin.addEventListener('drop', e => {
+    e.preventDefault();
+    const draggedType = e.dataTransfer.getData('type');
+    const draggedName = e.dataTransfer.getData('name');
+    const binType = bin.getAttribute('data-type');
+
+    if(draggedType === binType){
+      score += 10;
+      alert(`Betul! Anda telah membuang ${draggedName} ke ${bin.title}. Skor +10`);
+      updateScore();
+      removeItem(draggedName);
+    } else {
+      alert(`Salah! ${draggedName} tidak boleh dibuang ke ${bin.title}.`);
+    }
+  });
+});
+
+function updateScore(){
+  scoreboard.innerText = `Skor: ${score}`;
+}
+
+function removeItem(name){
+  items.forEach(item => {
+    if(item.title === name){
+      item.remove();
+    }
+  });
+}
+</script>
+</body>
+</html>
